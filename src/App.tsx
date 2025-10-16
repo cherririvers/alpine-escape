@@ -98,7 +98,14 @@ function App() {
             <p className="text-xl text-stone-200 mb-8 max-w-2xl mx-auto">
               Experience the ultimate mountain getaway at Alpine Escape
             </p>
-            <Button variant="secondary" size="lg">
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={() => {
+                const element = document.querySelector('#home');
+                if (element) element.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               Check Availability
             </Button>
           </div>

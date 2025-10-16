@@ -105,7 +105,7 @@ const Header: React.FC = () => {
               <Button
                 variant="secondary"
                 size="md"
-                onClick={() => handleNavClick('#booking')}
+                onClick={() => handleNavClick('#home')}
               >
                 Book Now
               </Button>
@@ -150,7 +150,7 @@ const Header: React.FC = () => {
                   variant="secondary"
                   size="md"
                   className="w-full btn-mobile"
-                  onClick={() => handleNavClick('#booking')}
+                  onClick={() => handleNavClick('#home')}
                 >
                   Book Now
                 </Button>

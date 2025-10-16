@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Calendar, Users, MapPin, Search, Star, Award, Thermometer } from 'lucide-react';
+import { ChevronDown, Calendar, Users, MapPin, Search, Star, Award, Thermometer, MessageCircle, Check } from 'lucide-react';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
+import { formatAvailabilityCheckMessage, openWhatsApp } from '../../utils/whatsapp';
 
 const HeroSection: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -9,6 +10,8 @@ const HeroSection: React.FC = () => {
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(2);
   const [showBookingWidget, setShowBookingWidget] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Hero slides with different mountain scenes
   const heroSlides = [
@@ -52,8 +55,26 @@ const HeroSection: React.FC = () => {
 
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle booking logic here
-    alert('Booking request submitted! We will contact you shortly.');
+    setIsSubmitting(true);
+
+    try {
+      const message = formatAvailabilityCheckMessage({
+        checkIn,
+        checkOut,
+        guests
+      });
+
+      openWhatsApp(message);
+
+      setSubmitSuccess(true);
+      setTimeout(() => {
+        setSubmitSuccess(false);
+      }, 5000);
+    } catch (error) {
+      console.error('Error opening WhatsApp:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const scrollToNext = () => {
@@ -250,10 +271,39 @@ const HeroSection: React.FC = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <Button type="submit" variant="primary" size="lg" className="w-full btn-mobile">
-                      <Search className="w-5 h-5 mr-2" />
-                      Check Availability
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      className="w-full btn-mobile"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <MessageCircle className="w-5 h-5 mr-2 animate-pulse" />
+                          Opening WhatsApp...
+                        </>
+                      ) : submitSuccess ? (
+                        <>
+                          <Check className="w-5 h-5 mr-2" />
+                          Request Sent!
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-5 h-5 mr-2" />
+                          Check Availability
+                        </>
+                      )}
                     </Button>
+
+                    {submitSuccess && (
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg text-center">
+                        <p className="text-sm text-green-800">
+                          <Check className="w-4 h-4 inline mr-1" />
+                          WhatsApp message sent! We'll respond shortly.
+                        </p>
+                      </div>
+                    )}
                   </form>
 
                   {/* Trust Indicators */}

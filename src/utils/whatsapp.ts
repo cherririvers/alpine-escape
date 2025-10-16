@@ -213,3 +213,22 @@ export const formatContactMessage = (data: ContactFormData): string => {
 
   return message;
 };
+
+interface AvailabilityCheckData {
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+}
+
+export const formatAvailabilityCheckMessage = (data: AvailabilityCheckData): string => {
+  let message = `🏔️ *ALPINE ESCAPE - AVAILABILITY CHECK*\n\n`;
+
+  message += `📅 *Booking Request*\n`;
+  message += `Check-in: ${data.checkIn}\n`;
+  message += `Check-out: ${data.checkOut}\n`;
+  message += `Number of Guests: ${data.guests}\n\n`;
+
+  message += `I would like to check availability for the above dates. Please confirm if rooms are available and send me the booking details. Thank you!`;
+
+  return message;
+};
