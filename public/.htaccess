@@ -1,0 +1,8 @@
+# Fallback for og-image.jpg if not provided
+# This redirects to a beautiful mountain image from your site
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} og-image\.jpg$
+    RewriteRule ^(.*)$ https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1200&h=630&fit=crop [L,R=302]
+</IfModule>

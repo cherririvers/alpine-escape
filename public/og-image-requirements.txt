@@ -1,0 +1,43 @@
+OPEN GRAPH IMAGE REQUIREMENTS
+================================
+
+For optimal WhatsApp link preview, please create an image file named "og-image.jpg"
+and place it in this public directory with the following specifications:
+
+Required Dimensions:
+- Width: 1200px
+- Height: 630px
+- Aspect Ratio: 1.91:1
+- Format: JPG or PNG
+- File Size: Under 8MB (ideally under 300KB for faster loading)
+
+Recommended Content:
+- Feature the Alpine Escape lodge with mountain scenery
+- Include your logo
+- Add text overlay with your tagline
+- Use high-quality, appealing imagery that represents your brand
+- Ensure important content is centered (safe zone: 1000x500px)
+- Test on mobile devices to ensure readability
+
+Current Setup:
+The meta tags in index.html are configured to use:
+https://alpine-escap.staytech.in/og-image.jpg
+
+Once you add the image file to this directory, it will automatically be served
+from your production domain and display properly in WhatsApp link previews.
+
+Alternative:
+You can also use any of your existing hero images from the website by renaming
+or copying it as "og-image.jpg" in this directory.
+
+Suggested Images from Your Site:
+- Mountain lodge exterior shot
+- Panoramic Himalayan view from the property
+- Interior room with mountain view
+- Any compelling hero image that represents your brand
+
+Tools to Create OG Images:
+- Canva (https://www.canva.com) - free templates available
+- Adobe Express (https://www.adobe.com/express)
+- Figma (https://www.figma.com)
+- PhotoShop or any image editor
