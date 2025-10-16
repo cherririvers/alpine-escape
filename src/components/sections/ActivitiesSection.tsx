@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Mountain, Snowflake, Camera, Flame, TreePine, Compass, 
+import {
+  Mountain, Snowflake, Camera, Flame, TreePine, Compass,
   Clock, Users, Star, Calendar, MapPin, Shield, Award,
-  ChevronRight, Check, X, Phone, Mail, ArrowRight
+  ChevronRight, Check, X, Phone, Mail, ArrowRight, MessageCircle
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import { openWhatsApp, formatPackageBookingMessage } from '../../utils/whatsapp';
 
 const ActivitiesSection: React.FC = () => {
   const [selectedPackage, setSelectedPackage] = useState<number | null>(null);
@@ -207,8 +208,27 @@ const ActivitiesSection: React.FC = () => {
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const pkg = adventurePackages.find(p => p.id === selectedPackage);
-    alert(`Booking request submitted for ${pkg?.name}! We will contact you shortly to confirm your adventure.`);
+
+    if (pkg) {
+      const totalCost = pkg.price * participants;
+      const message = formatPackageBookingMessage({
+        packageName: pkg.name,
+        selectedDate: selectedDate,
+        participants: participants,
+        totalCost: totalCost
+      });
+
+      openWhatsApp(message);
+    }
+
     setShowBookingModal(false);
+
+    setTimeout(() => {
+      setSelectedDate('');
+      setParticipants(2);
+      setSelectedPackage(null);
+      setSelectedActivity('');
+    }, 500);
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -542,16 +562,18 @@ const ActivitiesSection: React.FC = () => {
                     Cancel
                   </Button>
                   <Button type="submit" variant="primary" className="flex-1">
-                    Confirm Booking
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Send via WhatsApp
                   </Button>
                 </div>
               </form>
 
               <div className="mt-6 pt-6 border-t border-stone-200">
-                <div className="flex items-center justify-between text-sm text-stone-600">
-                  <span>✓ Expert Guides</span>
-                  <span>✓ Safety Equipment</span>
-                  <span>✓ All Inclusive</span>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <p className="text-sm text-green-800 text-center">
+                    <MessageCircle className="w-4 h-4 inline mr-1" />
+                    Booking request will be sent via WhatsApp. Our team will confirm availability within 2-4 hours.
+                  </p>
                 </div>
               </div>
             </div>

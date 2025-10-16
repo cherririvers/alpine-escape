@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Utensils, Coffee, Wine, Flame, Mountain, Star, Clock, Users, 
+import {
+  Utensils, Coffee, Wine, Flame, Mountain, Star, Clock, Users,
   Leaf, Award, ChefHat, MapPin, Calendar, Phone, Mail,
-  Check, X, Heart, Thermometer, TreePine, Sun
+  Check, X, Heart, Thermometer, TreePine, Sun, MessageCircle
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import { openWhatsApp, formatDiningReservationMessage } from '../../utils/whatsapp';
 
 const DiningSection: React.FC = () => {
   const [selectedMealPlan, setSelectedMealPlan] = useState<number | null>(null);
@@ -180,8 +181,22 @@ const DiningSection: React.FC = () => {
 
   const handleReservationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Reservation request submitted for ${partySize} guests on ${reservationDate} at ${selectedTime}. We will contact you shortly to confirm.`);
+
+    const message = formatDiningReservationMessage({
+      venueName: 'Alpine Escape Restaurant',
+      date: reservationDate,
+      time: selectedTime,
+      partySize: partySize
+    });
+
+    openWhatsApp(message);
     setShowReservationModal(false);
+
+    setTimeout(() => {
+      setReservationDate('');
+      setPartySize(2);
+      setSelectedTime('19:00');
+    }, 500);
   };
 
   return (
@@ -553,16 +568,18 @@ const DiningSection: React.FC = () => {
                     Cancel
                   </Button>
                   <Button type="submit" variant="primary" className="flex-1">
-                    Confirm Reservation
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Send via WhatsApp
                   </Button>
                 </div>
               </form>
 
               <div className="mt-6 pt-6 border-t border-stone-200">
-                <div className="flex items-center justify-between text-sm text-stone-600">
-                  <span>✓ Mountain Views</span>
-                  <span>✓ Local Cuisine</span>
-                  <span>✓ Expert Chefs</span>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <p className="text-sm text-green-800 text-center">
+                    <MessageCircle className="w-4 h-4 inline mr-1" />
+                    Your reservation request will be sent via WhatsApp for quick confirmation
+                  </p>
                 </div>
               </div>
             </div>

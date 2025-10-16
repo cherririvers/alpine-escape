@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, Users, CreditCard, Check, X, MapPin, Clock, 
+import {
+  Calendar, Users, CreditCard, Check, X, MapPin, Clock,
   Star, Shield, Phone, Mail, AlertCircle, ChevronRight,
-  Bed, Mountain, Utensils, Car, Wifi, Coffee
+  Bed, Mountain, Utensils, Car, Wifi, Coffee, MessageCircle
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import {
+  openWhatsApp,
+  formatRoomBookingMessage,
+  formatActivityBookingMessage,
+  formatPackageBookingMessage
+} from '../../utils/whatsapp';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -121,22 +127,69 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
   const handleBookingSubmit = async () => {
     setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Generate confirmation number
-    const confirmNum = 'AE' + Date.now().toString().slice(-6);
-    setConfirmationNumber(confirmNum);
-    setBookingConfirmed(true);
-    setIsProcessing(false);
+
+    try {
+      let message = '';
+
+      if (bookingType === 'room') {
+        message = formatRoomBookingMessage({
+          itemName: itemData?.name,
+          checkIn: bookingData.checkIn,
+          checkOut: bookingData.checkOut,
+          guests: bookingData.guests,
+          mealPlan: bookingData.mealPlan,
+          firstName: bookingData.firstName,
+          lastName: bookingData.lastName,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          specialRequests: bookingData.specialRequests,
+          bedPreference: bookingData.bedPreference,
+          dietaryRestrictions: bookingData.dietaryRestrictions,
+          arrivalTime: bookingData.arrivalTime,
+          transportation: bookingData.transportation,
+          totalCost: totalCost,
+          nights: nights
+        });
+      } else if (bookingType === 'activity') {
+        message = formatActivityBookingMessage({
+          activityName: itemData?.name || 'Activity',
+          selectedDate: bookingData.selectedDate,
+          participants: bookingData.participants,
+          firstName: bookingData.firstName,
+          lastName: bookingData.lastName,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          specialRequests: bookingData.specialRequests,
+          totalCost: totalCost
+        });
+      } else if (bookingType === 'package') {
+        message = formatPackageBookingMessage({
+          packageName: itemData?.name || 'Package',
+          selectedDate: bookingData.selectedDate,
+          participants: bookingData.participants,
+          totalCost: totalCost
+        });
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      openWhatsApp(message);
+
+      const confirmNum = 'AE' + Date.now().toString().slice(-6);
+      setConfirmationNumber(confirmNum);
+      setBookingConfirmed(true);
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const getStepTitle = (step: number) => {
     switch (step) {
       case 1: return 'Booking Details';
       case 2: return 'Guest Information';
-      case 3: return 'Payment Details';
+      case 3: return 'Contact Details';
       case 4: return 'Review & Confirm';
       default: return 'Booking';
     }
@@ -155,10 +208,10 @@ const BookingModal: React.FC<BookingModalProps> = ({
               </div>
             </div>
             <h2 className="text-3xl font-serif font-bold text-forest-900 mb-4">
-              Booking Confirmed!
+              Booking Request Sent!
             </h2>
             <p className="text-xl text-stone-600 mb-6">
-              Your mountain adventure is all set. We can't wait to welcome you to Alpine Escape!
+              Your booking request has been sent via WhatsApp. Our team will confirm your reservation shortly.
             </p>
             
             <div className="bg-forest-50 rounded-lg p-6 mb-6">
@@ -196,12 +249,12 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
             <div className="space-y-4 mb-8">
               <div className="flex items-center justify-center space-x-2 text-green-600">
-                <Check className="w-5 h-5" />
-                <span>Confirmation email sent to {bookingData.email}</span>
+                <MessageCircle className="w-5 h-5" />
+                <span>WhatsApp message sent to our booking team</span>
               </div>
               <div className="flex items-center justify-center space-x-2 text-green-600">
                 <Check className="w-5 h-5" />
-                <span>SMS confirmation sent to {bookingData.phone}</span>
+                <span>We'll confirm your booking within 2-4 hours</span>
               </div>
               <div className="flex items-center justify-center space-x-2 text-green-600">
                 <Check className="w-5 h-5" />
@@ -532,78 +585,21 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
               )}
 
-              {/* Step 3: Payment Details */}
+              {/* Step 3: Contact Details */}
               {currentStep === 3 && (
                 <div className="space-y-6">
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-center space-x-2">
-                      <Shield className="w-5 h-5 text-amber-600" />
-                      <span className="text-amber-800 font-medium">Secure Payment</span>
+                      <MessageCircle className="w-5 h-5 text-green-600" />
+                      <span className="text-green-800 font-medium">WhatsApp Booking</span>
                     </div>
-                    <p className="text-amber-700 text-sm mt-1">
-                      Your payment information is encrypted and secure. We use industry-standard SSL encryption.
+                    <p className="text-green-700 text-sm mt-1">
+                      Your booking request will be sent via WhatsApp to our team. No payment required now - we'll send you payment details after confirming availability.
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
-                      Card Number *
-                    </label>
-                    <input
-                      type="text"
-                      value={bookingData.cardNumber}
-                      onChange={(e) => handleInputChange('cardNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
-                      placeholder="1234 5678 9012 3456"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
-                      Cardholder Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={bookingData.cardName}
-                      onChange={(e) => handleInputChange('cardName', e.target.value)}
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
-                      placeholder="Name as on card"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">
-                        Expiry Date *
-                      </label>
-                      <input
-                        type="text"
-                        value={bookingData.expiryDate}
-                        onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
-                        placeholder="MM/YY"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">
-                        CVV *
-                      </label>
-                      <input
-                        type="text"
-                        value={bookingData.cvv}
-                        onChange={(e) => handleInputChange('cvv', e.target.value)}
-                        className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-forest-500 focus:border-transparent"
-                        placeholder="123"
-                        required
-                      />
-                    </div>
-                  </div>
-
                   <div className="bg-forest-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-forest-900 mb-3">Payment Summary</h4>
+                    <h4 className="font-semibold text-forest-900 mb-3">Booking Summary</h4>
                     <div className="space-y-2 text-sm">
                       {bookingType === 'room' && (
                         <>
@@ -634,10 +630,20 @@ const BookingModal: React.FC<BookingModalProps> = ({
                         <span>₹{Math.round((totalCost / 1.12) * 0.12).toLocaleString()}</span>
                       </div>
                       <div className="border-t border-stone-200 pt-2 flex justify-between font-semibold">
-                        <span>Total Amount</span>
+                        <span>Estimated Total</span>
                         <span>₹{totalCost.toLocaleString()}</span>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-amber-900 mb-2">How it works:</h4>
+                    <ol className="text-sm text-amber-800 space-y-1 list-decimal list-inside">
+                      <li>Click "Send WhatsApp Request" to submit your booking</li>
+                      <li>Our team will check availability and confirm within 2-4 hours</li>
+                      <li>We'll send you secure payment link after confirmation</li>
+                      <li>Make payment to complete your booking</li>
+                    </ol>
                   </div>
                 </div>
               )}
@@ -726,8 +732,17 @@ const BookingModal: React.FC<BookingModalProps> = ({
                   onClick={currentStep === 4 ? handleBookingSubmit : handleNextStep}
                   disabled={isProcessing}
                 >
-                  {isProcessing ? 'Processing...' : currentStep === 4 ? 'Confirm Booking' : 'Next'}
-                  {!isProcessing && currentStep < 4 && <ChevronRight className="w-4 h-4 ml-2" />}
+                  {isProcessing ? 'Opening WhatsApp...' : currentStep === 4 ? (
+                    <>
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Send WhatsApp Request
+                    </>
+                  ) : (
+                    <>
+                      Next
+                      <ChevronRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import {
   MapPin, Phone, Mail, Clock, Car, Plane, Train, Bus,
   Navigation, Mountain, TreePine, Camera, Compass, Star,
   Send, User, MessageCircle, AlertCircle, CheckCircle,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
+import { openWhatsApp, formatContactMessage } from '../../utils/whatsapp';
 
 const LocationContactSection: React.FC = () => {
   const [contactForm, setContactForm] = useState({
@@ -182,12 +183,28 @@ const LocationContactSection: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitted(true);
-    setIsSubmitting(false);
+
+    try {
+      const message = formatContactMessage({
+        name: contactForm.name,
+        email: contactForm.email,
+        phone: contactForm.phone,
+        subject: contactForm.subject,
+        message: contactForm.message,
+        preferredContact: contactForm.preferredContact,
+        urgency: contactForm.urgency
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      openWhatsApp(message);
+
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -202,14 +219,14 @@ const LocationContactSection: React.FC = () => {
                 </div>
               </div>
               <h2 className="text-3xl font-serif font-bold text-forest-900 mb-4">
-                Message Sent Successfully!
+                Message Sent via WhatsApp!
               </h2>
               <p className="text-xl text-stone-600 mb-6">
-                Thank you for contacting Alpine Escape. Our team will respond within 24 hours.
+                Your inquiry has been sent to our team via WhatsApp. We'll respond within 24 hours.
               </p>
               <div className="bg-forest-50 rounded-lg p-4 mb-6">
                 <p className="text-forest-800">
-                  <strong>What's Next:</strong> Our mountain experts will review your inquiry and provide 
+                  <strong>What's Next:</strong> Our mountain experts will review your inquiry on WhatsApp and provide
                   personalized recommendations for your perfect Himalayan adventure.
                 </p>
               </div>
@@ -555,11 +572,11 @@ const LocationContactSection: React.FC = () => {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    'Sending Message...'
+                    'Opening WhatsApp...'
                   ) : (
                     <>
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Message
+                      <MessageCircle className="w-5 h-5 mr-2" />
+                      Send via WhatsApp
                     </>
                   )}
                 </Button>
